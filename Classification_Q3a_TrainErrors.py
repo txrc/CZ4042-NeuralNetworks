@@ -36,7 +36,7 @@ def ffn(x, hidden_units):
 
 
     with tf.name_scope('softmax_linear'):
-        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(NUM_FEATURES))), name='weights')
+        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(hidden_units))), name='weights')
         biases  = tf.Variable(tf.zeros([NUM_CLASSES]), name='biases')
         logits  = tf.matmul(hidden, weight_2) + biases 
         
@@ -90,6 +90,7 @@ def training(num_neurons):
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
+        loss_error = []
         train_error = []
         for i in range(epochs):
             np.random.shuffle(idx) # Shuffles the index of the dataset
@@ -100,12 +101,12 @@ def training(num_neurons):
 
             # Training Error and Accuracies
             train_error.append(error.eval(feed_dict={x: trainX, y_: trainY}))
-            
+            loss_error.append(loss.eval(feed_dict={x: trainX, y_: trainY}))
 
             if i % 100 == 0:
                 print('Epoch {}: Training Error {} for No. Of Neurons {}'.format(i, train_error[i], num_neurons)) # Training acc
                 # print('The total model accuracy on the test data at epoch {} is {}'.format(i, test_acc[i])) # Testing acc
-
+    # return loss_error
     return train_error
 
 
@@ -124,12 +125,22 @@ def main():
         plt.plot(range(epochs), paras[i], label='No. Of Neurons = {}'.format(num_neurons[i]))
 
     # plot learning curves
-    plt.title("Training Erorrs vs. No. Of Epochs for No. Of Neurons")
+
+    # For Classification Errors
+    plt.title("Training Errors vs. No. Of Epochs for No. Of Neurons")
     plt.xlabel('Epochs')
     plt.ylabel('Training Errors')
     plt.legend()
     plt.savefig('./Classification_Q3a_TrainError.png')
     plt.show()
+
+    # For Loss Errors
+    # plt.title("Loss vs. No. Of Epochs for No. Of Neurons")
+    # plt.xlabel('Epochs')
+    # plt.ylabel('Loss')
+    # plt.legend()
+    # plt.savefig('./Classification_Q3a_Loss.png')
+    # plt.show()
 
 
 if __name__ == '__main__':

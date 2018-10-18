@@ -35,7 +35,7 @@ def ffn(x, hidden_units):
 
 
     with tf.name_scope('softmax_linear'):
-        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(NUM_FEATURES))), name='weights')
+        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(hidden_units))), name='weights')
         biases  = tf.Variable(tf.zeros([NUM_CLASSES]), name='biases')
         logits  = tf.matmul(hidden, weight_2) + biases 
         
@@ -90,6 +90,7 @@ def train(batch_size):
         sess.run(tf.global_variables_initializer())
 
         time_to_update = 0
+        loss_error = []
         train_error = []
         for i in range(epochs):
             np.random.shuffle(idx) # Shuffles the index of the dataset
@@ -101,12 +102,14 @@ def train(batch_size):
             time_to_update += time.time() - t
 
             # Training Error
+            loss_error.append(loss.eval(feed_dict={x:trainX, y_: trainY}))
             train_error.append(error.eval(feed_dict={x: trainX, y_: trainY}))  
             
             if i % 100 == 0:
                 # print('{}'.format(train_error[i])) # Training Errors 
                 print('The total training errors for epoch {} is {} with batch size of {}'.format(i, train_error[i], batch_size)) # Testing acc
-    return train_error
+    return loss_error
+    # return train_error
         
 def main():
     batch_sizes = [4, 8, 16, 32, 64]
@@ -117,15 +120,29 @@ def main():
     
     paras = np.array(paras)
 
+
+
     plt.figure()
     for i in range(len(batch_sizes)):
         plt.plot(range(epochs), paras[i], label='Batch Size = {}'.format(batch_sizes[i]))
 
-    plt.title("Training Errors vs. No. Of Epochs for all Batch Size")
+
+    # plt.title("Training Errors vs. No. Of Epochs for all Batch Size")
+    # plt.xlabel('Epochs')
+    # plt.ylabel('Training Errors')
+    # plt.legend()
+    # plt.savefig('./Classification_Q2a_TrainError.png')
+    # plt.show()
+
+
+    plt.title("Loss vs. No. Of Epochs for all Batch Size")
     plt.xlabel('Epochs')
-    plt.ylabel('Training Errors')
+    plt.ylabel('Loss')
     plt.legend()
+    plt.savefig('./Classification_Q2a_Loss.png')
     plt.show()
+
+
 
 
 if __name__ == '__main__':

@@ -20,8 +20,8 @@ NUM_CLASSES = 6 # Classes are 1,2,3,4,5,7 ; 6 has been excluded from the dataset
 
 learning_rate = 0.01
 epochs = 1000
-batch_size = 8
-num_neurons = 15
+batch_size = 4
+num_neurons = 10
 seed = 10
 np.random.seed(seed)
 
@@ -35,7 +35,7 @@ def ffn(x, hidden_units):
 
 
     with tf.name_scope('softmax_linear'):
-        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(NUM_FEATURES))), name='weights')
+        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(hidden_units))), name='weights')
         biases  = tf.Variable(tf.zeros([NUM_CLASSES]), name='biases')
         logits  = tf.matmul(hidden, weight_2) + biases 
         
@@ -97,11 +97,10 @@ def train(beta):
                 train_op.run(feed_dict={x: trainX[start:end], y_: trainY[start:end]})
 
             # Training Error and Accuracies
-            # test_acc.append(accuracy.eval(feed_dict={x: testX, y_: testY}))
+            test_acc.append(accuracy.eval(feed_dict={x: testX, y_: testY}))
             
-            # if i % 100 == 0:
-                # print('Epoch {}: Test Accuracies {} for Decay Parameter {}'.format(i, test_acc[i], beta)) # Training acc
-                # print('The total model accuracy on the test data at epoch {} is {}'.format(i, test_acc[i])) # Testing acc
+            if i % 100 == 0:
+                print('The total model accuracy on the test data at epoch {} is {} for decay parameter {}'.format(i, test_acc[i], beta)) # Testing acc
 
 
         paras = np.zeros(1)
@@ -127,7 +126,7 @@ def main():
     plt.xlabel('Decay Parameter')
     plt.ylabel('Test Accuracy')
     plt.title('Test Accuracy vs. Decay Parameter')
-
+    plt.savefig('./Classification_Q4b_TestAccVsDecay.png')
 
     plt.show()
 

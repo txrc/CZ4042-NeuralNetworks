@@ -35,7 +35,7 @@ def ffn(x, hidden_units):
 
 
     with tf.name_scope('softmax_linear'):
-        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(NUM_FEATURES))), name='weights')
+        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(hidden_units))), name='weights')
         biases  = tf.Variable(tf.zeros([NUM_CLASSES]), name='biases')
         logits  = tf.matmul(hidden, weight_2) + biases 
         
@@ -133,6 +133,7 @@ def main():
     plt.xlabel('Batch size')
     plt.ylabel('Test Accuracy')
     plt.title('Test Accuracy vs. Batch Size')
+    plt.savefig('./Classification_Q2b_TestAccVsBatchSize.png')
     
 
     plt.figure(2)
@@ -141,6 +142,7 @@ def main():
     plt.xlabel('Batch Size')
     plt.ylabel('Time Taken (ms)')
     plt.title('Time Taken for One Epoch vs. Batch Size')
+    plt.savefig('./Classification_Q2b_TimeTakenVsBatchSize.png')
 
     
 

@@ -20,8 +20,8 @@ NUM_CLASSES = 6 # Classes are 1,2,3,4,5,7 ; 6 has been excluded from the dataset
 
 learning_rate = 0.01
 epochs = 1000
-batch_size = 8
-num_neurons = 15
+batch_size = 4
+num_neurons = 10
 seed = 10
 np.random.seed(seed)
 
@@ -35,7 +35,7 @@ def ffn(x, hidden_units):
 
 
     with tf.name_scope('softmax_linear'):
-        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(NUM_FEATURES))), name='weights')
+        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(hidden_units))), name='weights')
         biases  = tf.Variable(tf.zeros([NUM_CLASSES]), name='biases')
         logits  = tf.matmul(hidden, weight_2) + biases 
         
@@ -124,6 +124,7 @@ def main():
     plt.xlabel('Epochs')
     plt.ylabel('Training Errors')
     plt.legend()
+    plt.savefig('./Classification_Q4a_TrainErrorVsDecay.png')
     plt.show()
 
 

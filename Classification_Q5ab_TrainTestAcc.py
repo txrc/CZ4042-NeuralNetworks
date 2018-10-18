@@ -20,28 +20,35 @@ NUM_CLASSES = 6 # Classes are 1,2,3,4,5,7 ; 6 has been excluded from the dataset
 
 learning_rate = 0.01
 epochs = 1000
-batch_size = 4
+num_neurons = 10
+batch_size = 32
 seed = 10
-beta = 10e-12 # Regularization parameter
+beta = 10e-6 # Regularization parameter
 np.random.seed(seed)
 
-# Creating a 3 layer neural network
+# Creating a 4 layer neural network
 def ffn(x, hidden_units):
-    # Hidden layer
-    with tf.name_scope('hidden'):
+    # Hidden layer 1
+    with tf.name_scope('hidden1'):
         weight_1 = tf.Variable(tf.truncated_normal([NUM_FEATURES, hidden_units], stddev=1.0/math.sqrt(float(NUM_FEATURES))), name='weights')
         biases = tf.Variable(tf.zeros([hidden_units]), name='biases')
-        hidden = tf.nn.sigmoid(tf.matmul(x, weight_1) + biases)
+        hidden1 = tf.nn.sigmoid(tf.matmul(x, weight_1) + biases)
 
+    # Hidden layer 2
+    with tf.name_scope('hidden2'):
+        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, hidden_units], stddev=1.0/math.sqrt(float(hidden_units))), name='weights')
+        biases = tf.Variable(tf.zeros([hidden_units]), name='biases')
+        hidden2 = tf.nn.sigmoid(tf.matmul(hidden1, weight_2) + biases)
 
+    # Output layer 
     with tf.name_scope('softmax_linear'):
-        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(hidden_units))), name='weights')
+        weight_3 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(hidden_units))), name='weights')
         biases  = tf.Variable(tf.zeros([NUM_CLASSES]), name='biases')
-        logits  = tf.matmul(hidden, weight_2) + biases 
+        logits  = tf.matmul(hidden2, weight_3) + biases 
         
-    return logits, weight_1, weight_2
+    return logits, weight_1, weight_2, weight_3
 
-def training(num_neurons):
+def train(batch_size):
     #read train data
     train_input = np.loadtxt('sat_train.txt',delimiter=' ')
     trainX, train_Y = train_input[:,:36], train_input[:,-1].astype(int) # train_input[:,-1] starts from last input basically labels
@@ -50,7 +57,6 @@ def training(num_neurons):
 
     trainY = np.zeros((train_Y.shape[0], NUM_CLASSES)) # Creates empty predicted values
     trainY[np.arange(train_Y.shape[0]), train_Y-1] = 1 # One hot matrix
-
 
     # shape refers to a tuple (row, columns)
     n = trainX.shape[0] # 0 refers to number of rows
@@ -69,11 +75,11 @@ def training(num_neurons):
     y_ = tf.placeholder(tf.float32, [None, NUM_CLASSES])
 
     # Build the graph for the deep net
-    predicted, w1, w2 = ffn(x, num_neurons)
+    predicted, w1, w2, w3 = ffn(x, num_neurons)
 
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=predicted)
     # Loss function using L2 regularization
-    regularizer = tf.nn.l2_loss(w1) + tf.nn.l2_loss(w2)
+    regularizer = tf.nn.l2_loss(w1) + tf.nn.l2_loss(w2) + tf.nn.l2_loss(w3)
     loss = tf.reduce_mean(cross_entropy + beta * regularizer)
 
     # Create the gradient descent optimizer with the given learning rate.
@@ -89,48 +95,55 @@ def training(num_neurons):
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
+
+        time_to_update = 0
+        train_acc = []
         test_acc = []
         for i in range(epochs):
             np.random.shuffle(idx) # Shuffles the index of the dataset
             trainX = trainX[idx]
             trainY = trainY[idx]
+            t = time.time()
             for start, end in zip(range(0, N, batch_size), range(batch_size, N, batch_size)): # Creates a list of ranges
                 train_op.run(feed_dict={x: trainX[start:end], y_: trainY[start:end]})
+            time_to_update += time.time() - t
 
-            # Training Error and Accuracies
-            test_acc.append(accuracy.eval(feed_dict={x: testX, y_: testY}))
+            # Train accuracy on the train dataset
+            train_acc.append(accuracy.eval(feed_dict={x: trainX, y_: trainY}))
+
+            # Test Accuracy on the test dataset  
+            test_acc.append(accuracy.eval(feed_dict={x: testX, y_: testY }))
             
-
             if i % 100 == 0:
-                print('Epoch {}: Test Accuracies {} for No. Of Neurons {}'.format(i, test_acc[i], num_neurons)) # Training acc
-                # print('The total model accuracy on the test data at epoch {} is {}'.format(i, test_acc[i])) # Testing acc
-
-    return test_acc
-
-
-
+                # print('The total model accuracy on the test data at epoch {} is {} with batch size of {}'.format(i, test_acc[i], batch_size)) # Testing acc
+                print('{}'.format(test_acc[i])) # Testing acc
+    return train_acc, test_acc
+        
 def main():
-    num_neurons = [5, 10, 15, 20, 25]
-    no_threads =  mp.cpu_count()
-    p = mp.Pool(processes=no_threads)
-    paras = p.map(training, num_neurons)
 
-    paras = np.array(paras)
+    train_acc, test_acc = train(batch_size=32)
 
-
-    plt.figure()
-    for i in range(len(num_neurons)):
-        plt.plot(range(epochs), paras[i], label='No. Of Neurons = {}'.format(num_neurons[i]))
 
     # plot learning curves
-    plt.title("Test Accuracy vs. No. Of Epochs for selected No. Of Neurons")
-    plt.xlabel('Epochs')
+    plt.figure(1)
+    plt.plot(range(epochs), train_acc)
+    plt.title('4-Layer Train Accuracy against No. of Epochs for Batch Size {}'.format(batch_size))
+    plt.xlabel(str(epochs) + ' iterations')
+    plt.ylabel('Train Accuracy')
+    plt.savefig('./Classification_Q5_TrainAcc4Layer.png')
+
+
+    plt.figure(2)
+    plt.plot(range(epochs), test_acc)
+    plt.title('4-Layer Test Accuracy against No. of Epochs for Batch Size {}'.format(batch_size))
+    plt.xlabel(str(epochs) + ' iterations')
     plt.ylabel('Test Accuracy')
-    plt.legend()
-    plt.savefig('./Classification_Q3a_TestAcc.png')
+    plt.savefig('./Classification_Q5_TestAcc4Layer.png')
+    
     plt.show()
 
 
-if __name__ == '__main__':
-    main() 
 
+
+if __name__ == '__main__':
+  main()

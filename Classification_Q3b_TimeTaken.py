@@ -36,7 +36,7 @@ def ffn(x, hidden_units):
 
 
     with tf.name_scope('softmax_linear'):
-        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(NUM_FEATURES))), name='weights')
+        weight_2 = tf.Variable(tf.truncated_normal([hidden_units, NUM_CLASSES], stddev=1.0/math.sqrt(float(hidden_units))), name='weights')
         biases  = tf.Variable(tf.zeros([NUM_CLASSES]), name='biases')
         logits  = tf.matmul(hidden, weight_2) + biases 
         
@@ -118,7 +118,7 @@ def training(num_neurons):
 
 
 def main():
-    num_neurons = []
+    num_neurons = [5, 10, 15, 20, 25]
     no_threads =  mp.cpu_count()
     p = mp.Pool(processes=no_threads)
     paras = p.map(training, num_neurons)
