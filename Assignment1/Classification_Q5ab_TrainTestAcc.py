@@ -128,7 +128,7 @@ def main():
     plt.figure(1)
     plt.plot(range(epochs), train_acc)
     plt.title('4-Layer Train Accuracy against No. of Epochs for Batch Size {}'.format(batch_size))
-    plt.xlabel(str(epochs) + ' iterations')
+    plt.xlabel('Epochs')
     plt.ylabel('Train Accuracy')
     plt.savefig('./Classification_Q5_TrainAcc4Layer.png')
 
@@ -136,7 +136,7 @@ def main():
     plt.figure(2)
     plt.plot(range(epochs), test_acc)
     plt.title('4-Layer Test Accuracy against No. of Epochs for Batch Size {}'.format(batch_size))
-    plt.xlabel(str(epochs) + ' iterations')
+    plt.xlabel('Epochs')
     plt.ylabel('Test Accuracy')
     plt.savefig('./Classification_Q5_TestAcc4Layer.png')
     

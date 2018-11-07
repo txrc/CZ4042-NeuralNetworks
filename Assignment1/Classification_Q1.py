@@ -91,6 +91,7 @@ with tf.Session() as sess:
     train_acc = []
     train_error = []
     test_acc = []
+    loss_ = []
     for i in range(epochs):
         np.random.shuffle(idx) # Shuffles the index of the dataset
         trainX = trainX[idx]
@@ -101,16 +102,15 @@ with tf.Session() as sess:
         # Training Error and Accuracies
         train_acc.append(accuracy.eval(feed_dict={x: trainX, y_: trainY}))
         test_acc.append(accuracy.eval(feed_dict={x: testX, y_: testY}))
-
+        loss_.append(loss.eval(feed_dict={x: trainX, y_:trainY}))
         if i % 100 == 0:
             print('{}'.format(train_acc[i])) # Training acc
-            # print('Epoch: {} Training Accuracy: {}'.format(i,train_acc[i]))
             # print('The total model accuracy on the train data at epoch {} is {}'.format(i, train_acc[i])) # Testing acc
             # print('The total model accuracy on the test data at epoch {} is {}'.format(i, test_acc[i])) # Testing acc
 
 
 
-# plot learning curves
+#plot learning curves
 plt.figure(1)
 plt.plot(range(epochs), train_acc)
 plt.title('3-Layer Train Accuracy against No. of Epochs for Batch Size {}'.format(batch_size))
@@ -126,6 +126,15 @@ plt.title('3-Layer Test Accuracy against No. of Epochs for Batch Size {}'.format
 plt.xlabel('Epochs')
 plt.ylabel('Test Accuracy')
 plt.savefig('./Classification_Q1a_TestAcc.png')
+
+
+plt.figure(3)
+plt.plot(range(epochs), loss_)
+plt.title('3-Layer Cross Entropy against No. of Epochs for Batch Size {}'.format(batch_size))
+plt.xlabel('Epochs')
+plt.ylabel('Cross Entropy')
+plt.savefig('./Classification_Q1a_CrossEntropy.png')
+
 
 
 
