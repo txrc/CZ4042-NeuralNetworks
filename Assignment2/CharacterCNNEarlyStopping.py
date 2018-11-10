@@ -14,7 +14,7 @@ POOLING_STRIDE = 2 # Stride 2 > Start from 2 pixels
 MAX_LABEL = 15	
 BATCH_SIZE = 128
 
-no_epochs = 100
+no_epochs = 5
 lr = 0.01
 
 tf.logging.set_verbosity(tf.logging.ERROR)
@@ -27,7 +27,6 @@ def char_cnn_model(x):
 	input_layer = tf.reshape(
       tf.one_hot(x, 256), [-1, MAX_DOCUMENT_LENGTH, 256, 1]) # 256 different characters / -1 means it will infer on the dimension
 
-	print(input_layer.shape)
 
 	with tf.variable_scope('CNN_Layer1'):
 	    conv1 = tf.layers.conv2d(
@@ -36,13 +35,13 @@ def char_cnn_model(x):
 	        kernel_size=FILTER_SHAPE1,
 	        padding='VALID',
 	        activation=tf.nn.relu)
-	    print(conv1.shape)
+      
 	    pool1 = tf.layers.max_pooling2d(
 	        inputs=conv1,
 	        pool_size=POOLING_WINDOW,
 	        strides=POOLING_STRIDE,
 	        padding='SAME')
-	    print(pool1.shape)
+      
 	with tf.variable_scope('CNN_Layer2'):
 	    conv2 = tf.layers.conv2d(
 	    	inputs=pool1,
@@ -50,19 +49,19 @@ def char_cnn_model(x):
 	    	kernel_size=FILTER_SHAPE2,
 	    	padding='VALID',
 	    	activation=tf.nn.relu)
-	    print(conv2.shape)
+
 	    pool2 = tf.layers.max_pooling2d(
 	    	inputs=conv2,
 	    	pool_size=POOLING_WINDOW,
 	    	strides=POOLING_STRIDE,
 	    	padding='SAME')
-	    print(pool2.shape)
+
 
 	    pool2 = tf.squeeze(tf.reduce_max(pool2, 1), squeeze_dims=[1])
-	    print(pool2.shape)
+
 	    
 	logits = tf.layers.dense(pool2, MAX_LABEL, activation=None)
-	print(logits.shape)
+
 	return input_layer, logits 
 
 
@@ -197,14 +196,14 @@ def main():
 	plt.xlabel('Epochs')
 	plt.ylabel('Cross-Entropy-Loss')
 	plt.legend()
-	plt.savefig('./CharCNNTrainLossVsValidationLoss')
+	plt.savefig('./CharCNNTrainLossVsValidationLoss-EarlyStopping')
 
 	plt.figure(2)
 	plt.plot(range(no_epochs), train_loss)
 	plt.title('Char CNN Classifier Training Loss')
 	plt.xlabel('Epochs')
 	plt.ylabel('Train Cross-Entropy-Cost')
-	plt.savefig('./CharCNNTrainCrossEntropyLoss')
+	plt.savefig('./CharCNNTrainCrossEntropyLoss-EarlyStopping')
 
 
 	plt.figure(3)
@@ -212,35 +211,35 @@ def main():
 	plt.title('Char CNN Classifier Testing Loss')
 	plt.xlabel('Epochs')
 	plt.ylabel('Test Cross-Entropy-Cost')
-	plt.savefig('./CharCNNTestCrossEntropyLoss')
+	plt.savefig('./CharCNNTestCrossEntropyLoss-EarlyStopping')
 
 	plt.figure(4)
 	plt.plot(range(no_epochs), train_acc)
 	plt.title('Char CNN Classifier Train Accuracy')
 	plt.xlabel('Epochs')
 	plt.ylabel('Train Accuracy')
-	plt.savefig('./CharCNNTrainAccuracy')
+	plt.savefig('./CharCNNTrainAccuracy-EarlyStopping')
 
 	plt.figure(5)
 	plt.plot(range(no_epochs), test_acc)
 	plt.title('Char CNN Classifier Test Accuracy')
 	plt.xlabel('Epochs')
 	plt.ylabel('Test Accuracy')
-	plt.savefig('./CharCNNTestAccuracy')
+	plt.savefig('./CharCNNTestAccuracy-EarlyStopping')
 
 	plt.figure(6)
 	plt.plot(range(no_epochs), train_classi_error)
 	plt.title('Char CNN Classifier Train Classification Errors')
 	plt.xlabel('Epochs')
 	plt.ylabel('Train Classification Errors')
-	plt.savefig('./CharCNNTrainClassificationErrors')
+	plt.savefig('./CharCNNTrainClassificationErrors-EarlyStopping')
 
 	plt.figure(7)
 	plt.plot(range(no_epochs), test_classi_error)
 	plt.title('Char CNN Classifier Test Classification Errors')
 	plt.xlabel('Epochs')
 	plt.ylabel('Test Classification Errors')
-	plt.savefig('./CharCNNTestClassificationErrors')
+	plt.savefig('./CharCNNTestClassificationErrors-EarlyStopping')
 
 if __name__ == '__main__':
 	# char_cnn_model()
